@@ -29,5 +29,7 @@ wp_crack --decrypt-file [some_encrypted_file] --key " " --depth 5 --min 3 --max 
 This will attempt to crack the file. The depth is used for the freqency matrix. Min/max is the size of the potential password. Longer the key, the longer it takes.
 
 ##Resources
+
 [1] Helen Bergen's postin 1990 on sci.form. https://groups.google.com/forum/#!topic/sci.crypt/PmxaYcslekE
+
 [2] BENNETT, J (1987): Analysis of the encryption algorithm
