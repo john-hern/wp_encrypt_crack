@@ -39,6 +39,24 @@ fn main(){
                                .help("Key String")
                                .required(true)
                                .takes_value(true))
+                          .arg(Arg::with_name("depth")
+                               .long("depth")
+                               .value_name("int")
+                               .help("Depth of frequent chars to use")
+                               .default_value("5")
+                               .takes_value(true))
+                          .arg(Arg::with_name("min_length")
+                               .long("min")
+                               .value_name("int")
+                               .help("Min key length")
+                               .default_value("3")
+                               .takes_value(true))
+                          .arg(Arg::with_name("max_length")
+                               .long("max")
+                               .value_name("int")
+                               .help("Max key length")
+                               .default_value("12")
+                               .takes_value(true))    
                           .get_matches();
     
     if let Some(file) = matches.value_of("encrypt_file"){
@@ -51,9 +69,13 @@ fn main(){
     }
     if let Some(file) = matches.value_of("crack_file"){
         let key = matches.value_of("key").unwrap();
-        for x in 3..10
+        let depth = matches.value_of("depth").unwrap().parse::<usize>().unwrap();
+        let min = matches.value_of("min_length").unwrap().parse::<usize>().unwrap();
+        let max = matches.value_of("max_length").unwrap().parse::<usize>().unwrap();
+        
+        for x in min..max
         {
-            let ret = crack(file ,x, 5, key.as_bytes()[0]).unwrap();
+            let ret = crack(file ,x, depth, key.as_bytes()[0]).unwrap();
             for value in ret.iter(){
                 println!("{}", value);
             }
