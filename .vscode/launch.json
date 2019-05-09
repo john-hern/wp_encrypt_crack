@@ -69,22 +69,6 @@
             "externalConsole": false
         },
         {
-            "name": "(Windows)ZATE DecryptFile",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/target/debug/wp_crack.exe",
-            "args": [
-                "--decrypt-file",
-                "./HELLER1.wp",
-                "--key",
-                "GOD KNOWS"
-            ],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false
-        },
-        {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
