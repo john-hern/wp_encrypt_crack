@@ -24,13 +24,14 @@ wp_crack --decrypt-file [some_encrypted_file] --key [a_key]
 
 This will take the encrypted file and decrypt it, leaving an unencrypted copy in the directory as .dec. 
 
-wp_crack --decrypt-file [some_encrypted_file] --key " " --depth 5 --min 3 --max 12
+wp_crack --crack-file [some_encrypted_file] --key " " --depth 5 --min 3 --max 12
 
 This will attempt to crack the file. The depth is used for the frequency matrix. Min/max is the size of the potential password. Longer the key, the longer it takes. The key in this instance will be the 'frequent' char. Try with space or e. 
 
 ##Resources
 
-[1] Helen Bergen's post in 1990 on sci.form. https://groups.google.comforum/#!topic/sci.crypt/PmxaYcslekE
+[1] H. A. Bergen and W. J. Caelli. 1991. File security in WordPerfect 5.0. Cryptologia 15, 1 (January 1991), 57-66. DOI=http://dx.doi.org/10.1080/0161-119191865795 (reproduced in a 1990 USENET on sci.crypt: https://groups.google.com/d/msg/sci.crypt/PmxaYcslekE/omwi6aIAPV4J)
 
-[2] BENNETT, J (1987): Analysis of the encryption algorithm
+[2] John Bennett. 1987. Analysis of the encryption algorithm used in the WordPerfect processing program. Cryptologia 11, 4 (October 1987), 206-210. DOI=http://dx.doi.org/10.1080/0161-118791862027
+
 
