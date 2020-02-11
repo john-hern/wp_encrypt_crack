@@ -5,8 +5,6 @@ use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 use std::collections::HashMap;
-use itertools::Product;
-use std::ascii::escape_default;
 use std::convert::From;
 
 fn main(){
@@ -65,7 +63,9 @@ fn main(){
     }
     if let Some(file) = matches.value_of("decrypt_file"){
         let key = matches.value_of("key").unwrap();
-        decrypt_file(file, key.as_bytes());
+        if let Ok(decrypted) = decrypt_file(file, key.as_bytes()){
+            decrypted.write_file(format!("{}.dec", file).as_ref())
+        }
     }
     if let Some(file) = matches.value_of("crack_file"){
         let key = matches.value_of("key").unwrap();
@@ -89,8 +89,8 @@ enum WPFile{
 
 impl WPFile{
     fn from_file(file_path: &str) -> Result<WPFile, io::Error>{
-        let mut bytes = get_file_bytes(file_path).unwrap();
-        return WPFile::from_raw(&bytes);
+        let bytes = get_file_bytes(file_path).unwrap();
+        WPFile::from_raw(&bytes)
     }
     fn from_raw(bytes: &[u8]) -> Result<WPFile, io::Error>{
         if bytes.len() < 7 {
@@ -108,16 +108,16 @@ impl WPFile{
         let file_checksum = ((bytes[4] as u16) << 8) | bytes[5] as u16;
 
         if file_checksum == 0x0 {
-            return Ok(WPFile::Unencrypted(WPUnencryptedFile::new(&bytes)));
+            Ok(WPFile::Unencrypted(WPUnencryptedFile::new(&bytes)))
         }else{
-            let content = bytes[6..].iter().map(|x| *x).collect();
-            return Ok(WPFile::Encrypted(
+            let content = bytes[6..].iter().copied().collect();
+            Ok(WPFile::Encrypted(
                 WPEncryptedFile{
                             magic_bytes: [0xFF, 0xFF, 0x61, 0x61],
                             checksum: file_checksum,
                             contents: content
                         }
-            ));
+            ))
         }
     }
 }
@@ -132,12 +132,12 @@ impl WPUnencryptedFile{
         WPUnencryptedFile{
             magic_bytes: [0xFF, 0xFF, 0x61, 0x61],
             checksum: 0,
-            contents: contents.iter().map(|x| *x).collect::<Vec<u8>>()
+            contents: contents.iter().copied().collect::<Vec<u8>>()
         }
     }
     fn encrypt(self, key: &[u8]) -> WPEncryptedFile
     {
-        return WPEncryptedFile::encrypt(&self.contents, key);
+        WPEncryptedFile::encrypt(&self.contents, key)
     }
     fn write_file(&self, file_name: &str){
         let mut contents: Vec<u8> = Vec::new(); 
@@ -161,14 +161,14 @@ impl WPEncryptedFile{
         let checksum = checksum(key);
         WPEncryptedFile{
             magic_bytes: [0xFF, 0xFF, 0x61, 0x61],
-            checksum: checksum,
+            checksum,
             contents: encrypted
         }
     }
     fn decrypt(self, key: &[u8]) -> WPUnencryptedFile
     {
         let decrypted = crypt(&self.contents, key);
-        return WPUnencryptedFile::new(&decrypted);
+        WPUnencryptedFile::new(&decrypted)
     }
     fn write_file(&self, file_name: &str){
         let mut contents: Vec<u8> = Vec::new(); 
@@ -190,10 +190,10 @@ fn encrypt_file(file_name: &str, key_bytes: &[u8]){
 fn decrypt_file(file_name: &str, key_bytes: &[u8]) -> Result<WPUnencryptedFile, io::Error>
 {
     if let Ok(WPFile::Encrypted(file)) = WPFile::from_file(file_name){
-        return Ok(file.decrypt(key_bytes));
+        Ok(file.decrypt(key_bytes))
     }else{
         //Invalid file. 
-        return Err(io::Error::from(io::ErrorKind::InvalidInput));
+        Err(io::Error::from(io::ErrorKind::InvalidInput))
     }
 }
 
@@ -259,21 +259,20 @@ fn crack(file_name: &str, key_size: usize, depth: usize, frequent_char: u8) -> R
     for entry in product{
         let check = checksum(&entry[0..]);
         if check == file_checksum {
-            match std::str::from_utf8(&entry){
-                Ok(a_str) => ret.push(a_str.to_owned()),
-                _=> () //Invalid, so we just skip. 
+            if let Ok(a_str) = std::str::from_utf8(&entry){
+                ret.push(a_str.to_owned())
             }
         }
     }
     
-    return Ok(ret);
+    Ok(ret)
 }
 
 fn get_file_bytes(file_path: &str) -> io::Result<Vec<u8>> {
     let mut f = File::open(file_path)?;
     let mut buffer = Vec::new(); 
     f.read_to_end(&mut buffer)?;
-    return Ok(buffer);
+    Ok(buffer)
 }
 
 fn write_file_bytes(file_path: &str, bytes: &[u8]) -> io::Result<()>{
@@ -300,7 +299,7 @@ fn crypt(data: &[u8], key_bytes: &[u8]) -> Vec<u8>
         i += 1;
         sequence = sequence.wrapping_add(1);
     }
-    return ret;
+    ret
 }
 
 fn checksum(key_bytes: &[u8]) -> u16
@@ -316,7 +315,7 @@ fn checksum(key_bytes: &[u8]) -> u16
         //Xor tmp with the checksum.
         checksum ^= tmp;
     } 
-    return checksum;
+    checksum
 }
 //Borrowed these two functions: https://gist.github.com/kylewlacy/115965b40e02a3325558. Thanks Kyle!
 pub fn partial_cartesian<T: Clone>(a: Vec<Vec<T>>, b: &[T]) -> Vec<Vec<T>> {

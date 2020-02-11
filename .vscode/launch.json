@@ -19,6 +19,21 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false
+        }, {
+            "name": "(linux) Crack Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/wp_crack",
+            "args": [
+                "--crack-file",
+                "./PASSWORD.WP4",
+                "--key",
+                " "
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false
         },
         {
             "name": "(Windows) Encrypt Test File",
@@ -68,24 +83,6 @@
             "environment": [],
             "externalConsole": false
         },
-        {
-            "name": "(gdb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/target/debug/wp_crack",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        }
+        
     ]
 }
