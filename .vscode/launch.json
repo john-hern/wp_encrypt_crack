@@ -21,12 +21,12 @@
             "externalConsole": false
         }, {
             "name": "(linux) Crack Launch",
-            "type": "cppvsdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/wp_crack",
             "args": [
                 "--crack-file",
-                "./PASSWORD.WP4",
+                "./dummy_text.txt.enc",
                 "--key",
                 " "
             ],

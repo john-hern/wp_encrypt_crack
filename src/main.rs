@@ -54,30 +54,46 @@ fn main(){
                                .value_name("int")
                                .help("Max key length")
                                .default_value("12")
-                               .takes_value(true))    
+                               .takes_value(true))
+                            .arg(Arg::with_name("limit")
+                               .long("limit")
+                               .value_name("int")
+                               .help("Limits the number of results (use 0 for all results)")
+                               .default_value("12")
+                               .takes_value(true))        
                           .get_matches();
     
     if let Some(file) = matches.value_of("encrypt_file"){
         let key = matches.value_of("key").unwrap();
         encrypt_file(file, key.as_bytes());
     }
+
     if let Some(file) = matches.value_of("decrypt_file"){
         let key = matches.value_of("key").unwrap();
         if let Ok(decrypted) = decrypt_file(file, key.as_bytes()){
             decrypted.write_file(format!("{}.dec", file).as_ref())
         }
     }
+    
     if let Some(file) = matches.value_of("crack_file"){
         let key = matches.value_of("key").unwrap();
         let depth = matches.value_of("depth").unwrap().parse::<usize>().unwrap();
         let min = matches.value_of("min_length").unwrap().parse::<usize>().unwrap();
         let max = matches.value_of("max_length").unwrap().parse::<usize>().unwrap();
-        
+        let limit = matches.value_of("limit").unwrap().parse::<usize>().unwrap();
+        let mut i = 0; 
         for x in min..max
         {
-            let ret = crack(file ,x, depth, key.as_bytes()[0]).unwrap();
-            for value in ret.iter(){
+            let mut ret = crack(file ,x, depth, key.as_bytes()[0]).unwrap();
+            for value in ret.iter() {
                 println!("{}", value);
+                i += 1; 
+                if(limit > 0 && i >= limit) {
+                    break;
+                }
+            }
+            if (limit > 0 && i >= limit){ 
+                break;
             }
         }   
     }
@@ -165,11 +181,13 @@ impl WPEncryptedFile{
             contents: encrypted
         }
     }
+
     fn decrypt(self, key: &[u8]) -> WPUnencryptedFile
     {
         let decrypted = crypt(&self.contents, key);
         WPUnencryptedFile::new(&decrypted)
     }
+
     fn write_file(&self, file_name: &str){
         let mut contents: Vec<u8> = Vec::new(); 
         contents.extend_from_slice(&self.magic_bytes);
@@ -244,7 +262,8 @@ fn crack(file_name: &str, key_size: usize, depth: usize, frequent_char: u8) -> R
     }
     let mut most_frequent_decrypted_as: Vec<Vec<u8>> = Vec::new();
     //We are assuming that either space or e are the most frequent chars. So let's see if that holds true. 
-    for i in 0..x{
+    for i in 0..x
+    {
         let mut top_decrypted: Vec<u8> = Vec::new();
         for j in 0..depth{
             let column_pairs = &ordered[i];
